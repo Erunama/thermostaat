@@ -34,12 +34,6 @@ class AwayModeSensor(BinarySensorEntity):
     _attr_translation_key = "away_mode"
     _attr_name = "Away Mode"
     _attr_device_class = BinarySensorDeviceClass.PRESENCE
-    _attr_device_info = {
-        "identifiers": {(DOMAIN, "away_mode")},
-        "name": "Away Mode",
-        "manufacturer": "Erunama",
-        "model": "Away Mode Sensor",
-    }
 
     def __init__(self, manager: ThermostaatManager, entry_id: str):
         self._attr_unique_id = f"{entry_id}_away_mode"
@@ -61,12 +55,6 @@ class ManualModeSensor(BinarySensorEntity):
     _attr_has_entity_name = True
     _attr_translation_key = "manual_override"
     _attr_name = "Manual Override"
-    _attr_device_info = {
-        "identifiers": {(DOMAIN, "manual_override")},
-        "name": "Manual Override",
-        "manufacturer": "Erunama",
-        "model": "Manual Override Sensor",
-    }
 
     def __init__(self, manager: ThermostaatManager, entry_id: str):
         self._attr_unique_id = f"{entry_id}_manual_mode"
@@ -89,12 +77,6 @@ class WindowModeSensor(BinarySensorEntity):
     _attr_translation_key = "window_open"
     _attr_name = "Window Open"
     _attr_device_class = BinarySensorDeviceClass.WINDOW
-    _attr_device_info = {
-        "identifiers": {(DOMAIN, "window_open")},
-        "name": "Window Open",
-        "manufacturer": "Erunama",
-        "model": "Window Open Sensor",
-    }
 
     def __init__(self, manager: ThermostaatManager, entry_id: str):
         self._attr_unique_id = f"{entry_id}_window_mode"
@@ -118,12 +100,6 @@ class EffectiveTemperatureSensor(SensorEntity):
     _attr_native_unit_of_measurement = "°C"
     _attr_name = "Effective Temperature"
     _attr_device_class = SensorDeviceClass.TEMPERATURE
-    _attr_device_info = {
-        "identifiers": {(DOMAIN, "effective_temperature")},
-        "name": "Effective Temperature",
-        "manufacturer": "Erunama",
-        "model": "Effective Temperature Sensor",
-    }
 
     def __init__(self, manager: ThermostaatManager, entry_id: str):
         self._attr_unique_id = f"{entry_id}_effective_temperature"
