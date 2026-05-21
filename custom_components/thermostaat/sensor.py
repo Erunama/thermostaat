@@ -30,7 +30,6 @@ class AwayModeSensor(BinarySensorEntity):
     """
     Sensor that indicates if the system is in away mode.
     """
-
     _attr_has_entity_name = True
     _attr_translation_key = "away_mode"
     _attr_name = "Away Mode"
@@ -59,7 +58,6 @@ class ManualModeSensor(BinarySensorEntity):
     """
     Sensor that indicates if the system is in manual override mode.
     """
-
     _attr_has_entity_name = True
     _attr_translation_key = "manual_override"
     _attr_name = "Manual Override"
