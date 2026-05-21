@@ -1,0 +1,45 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Thermostat Wrapper",
+        "description": "Configureer thermostaat wrapper",
+        "data": {
+          "climate_entity": "Klimaat entity",
+          "window_sensor": "Raam sensor",
+          "away_entity": "Afwezig entity",
+          "away_temperature": "Afwezig tempratuur",
+          "schedule_temperature": "Planning tempratuur"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Kan niet verbinden"
+    },
+    "abort": {
+      "already_configured": "Reeds geconfigureerd"
+    }
+  },
+
+  "entity": {
+    "sensor": {
+      "effective_temperature": {
+        "name": "Effectieve tempratuur"
+      }
+    },
+
+    "binary_sensor": {
+      "manual_override": {
+        "name": "Handmatige modus"
+      },
+
+      "away_mode": {
+        "name": "Afwezig modus"
+      },
+
+      "window_open": {
+        "name": "Open raam modus"
+      }
+    }
+  }
+}
