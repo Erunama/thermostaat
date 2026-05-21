@@ -1,0 +1,45 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Thermostat Wrapper",
+        "description": "Configure thermostat wrapper",
+        "data": {
+          "climate_entity": "Climate entity",
+          "window_sensor": "Window sensor",
+          "away_entity": "Away entity",
+          "away_temperature": "Away temperature",
+          "schedule_temperature": "Schedule temperature"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Cannot connect"
+    },
+    "abort": {
+      "already_configured": "Already configured"
+    }
+  },
+
+  "entity": {
+    "sensor": {
+      "effective_temperature": {
+        "name": "Effective temperature"
+      }
+    },
+
+    "binary_sensor": {
+      "manual_override": {
+        "name": "Manual override mode"
+      },
+
+      "away_mode": {
+        "name": "Away mode"
+      },
+
+      "window_open": {
+        "name": "Window mode"
+      }
+    }
+  }
+}

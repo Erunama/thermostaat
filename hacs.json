@@ -1,0 +1,6 @@
+{
+  "name": "Thermostaat",
+  "content_in_root": false,
+  "domains": ["thermostaat"],
+  "homeassistant": "2026.5.3"
+}
