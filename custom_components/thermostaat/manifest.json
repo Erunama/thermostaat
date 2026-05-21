@@ -3,6 +3,7 @@
   "name": "Thermostaat",
   "version": "0.0.1",
   "documentation": "https://github.com/Erunama/thermostaat",
+  "issue_tracker": "https://github.com/Erunama/thermostaat/issues",
   "requirements": [],
   "codeowners": ["@erunama"],
   "config_flow": true,
