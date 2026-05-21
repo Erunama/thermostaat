@@ -1,5 +1,10 @@
 import logging
 
+from decimal import Decimal
+from homeassistant.components.climate import ClimateEntity
+from homeassistant.components.sensor import SensorEntity
+from homeassistant.core import HomeAssistant
+
 _LOGGER = logging.getLogger(__name__)
 
 
@@ -8,20 +13,21 @@ class ThermostaatManager:
     Manages the thermostat logic.
     """
 
-    def __init__(self, hass, climate_entity, entry_id, away_temp, schedule_temp):
+    def __init__(self, hass: HomeAssistant, climate_entity: ClimateEntity, entry_id: str, away_temp: Decimal, scheduler_entity: SensorEntity):
         self.hass = hass
         self.climate_entity = climate_entity
         self.entry_id = entry_id
         self.away_temp = away_temp
-        self.scheduled_temp = schedule_temp
+        self._schedule_entity = scheduler_entity
         self.window_open = False
         self.is_away = False
         self.manual_override = False
-        self.effective_temp = schedule_temp
-        self.listeners = []
-        self.entities = []
+        self.effective_temp = Decimal(18.0)
+        self.scheduled_temp = Decimal(18.0)
+        self._listeners = []
+        self._entities = []
 
-    async def async_window_state_changed(self, is_open):
+    async def async_window_state_changed(self, is_open: bool):
         """
         Handles window state changes.
         """
@@ -33,7 +39,7 @@ class ThermostaatManager:
 
         await self.async_recalculate()
 
-    async def async_away_state_changed(self, is_away):
+    async def async_away_state_changed(self, is_away: bool):
         """
         Handles away state changes.
         """
@@ -45,7 +51,7 @@ class ThermostaatManager:
 
         await self.async_recalculate()
 
-    async def async_climate_state_changed(self, temperature):
+    async def async_climate_state_changed(self, temperature: Decimal):
         """
         Handles climate state changes.
         """
@@ -67,11 +73,12 @@ class ThermostaatManager:
 
     async def async_schedule_changed(
         self,
-        temperature,
+        temperature: Decimal,
     ):
         """
         Handles schedule changes.
         """
+        
         self.scheduled_temp = temperature
         _LOGGER.debug(
             "Schedule changed: %s",
@@ -111,12 +118,12 @@ class ThermostaatManager:
 
     async def async_cleanup(self):
         """Called when integration is unloaded."""
-        for unsub in self.listeners:
+        for unsub in self._listeners:
             unsub()
 
-        self.listeners.clear()
+        self._listeners.clear()
 
-    async def async_set_temperature(self, temperature):
+    async def async_set_temperature(self, temperature: Decimal):
         """Set the target temperature of the climate entity."""
         await self.hass.services.async_call(
             "climate",
