@@ -1,4 +1,5 @@
 # Thermostaat
+![GitHub Release](https://img.shields.io/github/v/release/Erunama/thermostaat?include_prereleases&display_name=tag&style=flat-square)
 A wrapper for the Tado X valve controlers to integrate to home assistant via matter but keep similar useability.
 
 The goal is to thus mimic and expand what I see as key features:
@@ -6,7 +7,7 @@ The goal is to thus mimic and expand what I see as key features:
  - Manual override mode: when the valve is changed it temporarily suspends the schedule temp.
  - Away mode: when away it should go it to a set base temp
  - Window mode: when the/a/all window(s) in a room are opened turn off the radiator
- 
+
 
 
 ## AI Usage
