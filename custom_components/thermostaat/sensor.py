@@ -28,12 +28,11 @@ class AwayModeSensor(BinarySensorEntity):
     """
     Sensor that indicates if the system is in away mode.
     """
+    _attr_has_entity_name = True
+    _attr_translation_key = "away_mode"
 
     def __init__(self, manager, entry_id):
         self._attr_unique_id = f"{entry_id}_away_mode"
-        self._attr_has_entity_name = True
-        self._attr_translation_key = "away_mode"
-
         self.manager = manager
 
     async def async_added_to_hass(self):
@@ -48,12 +47,11 @@ class ManualModeSensor(BinarySensorEntity):
     """
     Sensor that indicates if the system is in manual override mode.
     """
+    _attr_has_entity_name = True
+    _attr_translation_key = "manual_override"
 
     def __init__(self, manager, entry_id):
         self._attr_unique_id = f"{entry_id}_manual_mode"
-        self._attr_has_entity_name = True
-        self._attr_translation_key = "manual_override"
-
         self.manager = manager
 
     async def async_added_to_hass(self):
@@ -69,11 +67,11 @@ class WindowModeSensor(BinarySensorEntity):
     Sensor that indicates if the window is open.
     """
 
+    _attr_has_entity_name = True
+    _attr_translation_key = "window_open"
+
     def __init__(self, manager, entry_id):
         self._attr_unique_id = f"{entry_id}_window_mode"
-        self._attr_has_entity_name = True
-        self._attr_translation_key = "window_open"
-
         self.manager = manager
 
     async def async_added_to_hass(self):
@@ -88,13 +86,12 @@ class EffectiveTemperatureSensor(SensorEntity):
     """
     Sensor that indicates the effective temperature.
     """
+    _attr_has_entity_name = True
+    _attr_translation_key = "effective_temperature"
 
     def __init__(self, manager, entry_id):
         self._attr_unique_id = f"{entry_id}_effective_temperature"
         self._attr_unit_of_measurement = "°C"
-        self._attr_has_entity_name = True
-        self._attr_translation_key = "effective_temperature"
-
         self.manager = manager
 
     async def async_added_to_hass(self):

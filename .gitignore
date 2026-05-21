@@ -2,13 +2,16 @@
 __pycache__/
 *.py[codz]
 *$py.class
-
+.vscode/
 # C extensions
 *.so
-
+lib/
 # Distribution / packaging
 .Python
 build/
+bin/
+include/
+lib64
 develop-eggs/
 dist/
 downloads/
@@ -35,7 +38,7 @@ MANIFEST
 # Installer logs
 pip-log.txt
 pip-delete-this-directory.txt
-
+pyvenv.cfg
 # Unit test / coverage reports
 htmlcov/
 .tox/

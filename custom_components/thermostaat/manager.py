@@ -1,3 +1,8 @@
+import logging
+
+_LOGGER = logging.getLogger(__name__)
+
+
 class ThermostaatManager:
     """
     Manages the thermostat logic.
@@ -21,6 +26,10 @@ class ThermostaatManager:
         Handles window state changes.
         """
         self.window_open = is_open
+        _LOGGER.debug(
+            "Window state changed: %s",
+            is_open,
+        )
 
         await self.async_recalculate()
 
@@ -29,6 +38,10 @@ class ThermostaatManager:
         Handles away state changes.
         """
         self.is_away = is_away
+        _LOGGER.debug(
+            "Away state changed: %s",
+            is_away,
+        )
 
         await self.async_recalculate()
 
@@ -39,7 +52,15 @@ class ThermostaatManager:
         self.effective_temp = temperature
         if (self.effective_temp != self.scheduled_temp) and (not self.manual_override):
             self.manual_override = True
+            _LOGGER.debug(
+                "Manual override enabled: %s",
+                self.manual_override,
+            )
         else:
+            _LOGGER.debug(
+                "Manual override disabled: %s",
+                self.manual_override,
+            )
             self.manual_override = False
 
         await self.async_recalculate()
@@ -52,6 +73,10 @@ class ThermostaatManager:
         Handles schedule changes.
         """
         self.scheduled_temp = temperature
+        _LOGGER.debug(
+            "Schedule changed: %s",
+            temperature,
+        )
 
         await self.async_recalculate()
 
@@ -61,6 +86,12 @@ class ThermostaatManager:
         """
         # TODO: Implement logic
 
+        _LOGGER.debug(
+            "Starting recalculation with states: away=%s, manual_override=%s, window_open=%s",
+            self.is_away,
+            self.manual_override,
+            self.window_open,
+        )
         if self.window_open:
             await self.async_turn_off()
             return
