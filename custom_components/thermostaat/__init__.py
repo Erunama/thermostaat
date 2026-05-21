@@ -4,9 +4,8 @@ from homeassistant.helpers.event import async_track_state_change_event
 
 from .const import DOMAIN
 from .manager import ThermostaatManager
-import logging
+from decimal import Decimal
 
-_LOGGER = logging.getLogger(__name__)
 import logging
 
 _LOGGER = logging.getLogger(__name__)
@@ -33,14 +32,8 @@ async def async_setup_entry(
         )
         hass.data.setdefault(DOMAIN, {})
         hass.data[DOMAIN][entry.entry_id] = manager
-        hass.data[DOMAIN][entry.entry_id] = manager
 
     async def window_listener(event):
-        _LOGGER.debug(
-            "Window state change event: %s",
-            event,
-        )
-        new_state = event.data["new_state"]
         _LOGGER.debug(
             "Window state change event: %s",
             event,
@@ -51,15 +44,8 @@ async def async_setup_entry(
             return
 
         await manager.async_window_state_changed(new_state.state == "on")
-        await manager.async_window_state_changed(new_state.state == "on")
 
     async def away_listener(event):
-        """Listener for away state changes."""
-        _LOGGER.debug(
-            "Away state change event: %s",
-            event,
-        )
-        new_state = event.data["new_state"]
         """Listener for away state changes."""
         _LOGGER.debug(
             "Away state change event: %s",
@@ -79,38 +65,30 @@ async def async_setup_entry(
         )
 
         await manager.async_away_state_changed(is_away)
-        await manager.async_away_state_changed(is_away)
 
     async def climate_listener(event):
         _LOGGER.debug(
             "Climate state change event: %s",
             event,
         )
-        new_state = event.data["new_state"]
-        _LOGGER.debug(
-            "Climate state change event: %s",
-            event,
-        )
-        new_state = event.data["new_state"]
 
-        if new_state is None:
+        old_temp = _get_target_temperature(event.data.get("old_state"))
+        new_temp = _get_target_temperature(event.data.get("new_state"))
+
+        if old_temp == new_temp or new_temp is None:
             return
 
-        temp = new_state.attributes.get("temperature")
-        temp = new_state.attributes.get("temperature")
+        await manager.async_climate_state_changed(new_temp)
 
-        if temp is None:
-            return
+    def _get_target_temperature(
+        state,
+    ) -> Decimal | None:
+        if state is None:
+            return None
 
-        await manager.async_climate_state_changed(temp)
-        await manager.async_climate_state_changed(temp)
+        return Decimal(state.attributes.get("temperature"))
 
     async def schedule_listener(event):
-        _LOGGER.debug(
-            "Schedule state change event: %s",
-            event,
-        )
-        new_state = event.data["new_state"]
         _LOGGER.debug(
             "Schedule state change event: %s",
             event,
@@ -125,7 +103,6 @@ async def async_setup_entry(
         if temp is None:
             return
 
-        await manager.async_schedule_changed(temp)
         await manager.async_schedule_changed(temp)
 
     manager._listeners.extend(
@@ -174,4 +151,3 @@ async def async_unload_entry(
             await manager.async_cleanup()
 
     return unload_ok
-

@@ -72,7 +72,6 @@ class WindowModeSensor(BinarySensorEntity):
     """
     Sensor that indicates if the window is open.
     """
-
     _attr_has_entity_name = True
     _attr_translation_key = "window_open"
     _attr_name = "Window Open"
@@ -88,7 +87,9 @@ class WindowModeSensor(BinarySensorEntity):
     @property
     def is_on(self) -> bool:
         return self.manager.window_open
-
+    
+# class BateryModeSensor(BinarySensorEntity):
+# TODO: Expose
 
 class EffectiveTemperatureSensor(SensorEntity):
     """

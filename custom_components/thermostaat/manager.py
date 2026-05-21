@@ -13,7 +13,14 @@ class ThermostaatManager:
     Manages the thermostat logic.
     """
 
-    def __init__(self, hass: HomeAssistant, climate_entity: ClimateEntity, entry_id: str, away_temp: Decimal, scheduler_entity: SensorEntity):
+    def __init__(
+        self,
+        hass: HomeAssistant,
+        climate_entity: ClimateEntity,
+        entry_id: str,
+        away_temp: Decimal,
+        scheduler_entity: SensorEntity,
+    ):
         self.hass = hass
         self.climate_entity = climate_entity
         self.entry_id = entry_id
@@ -78,7 +85,7 @@ class ThermostaatManager:
         """
         Handles schedule changes.
         """
-        
+
         self.scheduled_temp = temperature
         _LOGGER.debug(
             "Schedule changed: %s",
