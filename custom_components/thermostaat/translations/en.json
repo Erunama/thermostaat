@@ -20,11 +20,29 @@
       "already_configured": "Already configured"
     }
   },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Thermostat Wrapper",
+        "description": "Configure thermostat wrapper",
+        "data": {
+          "manual_reset_mode": "Manual reset mode",
+          "away_temperature": "Away temperature"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Cannot connect"
+    },
+    "abort": {
+      "already_configured": "Already configured"
+    }
+  },
 
   "entity": {
     "sensor": {
-      "effective_temperature": {
-        "name": "Effective temperature"
+      "target_temperature": {
+        "name": "Target temperature"
       }
     },
 
@@ -39,6 +57,23 @@
 
       "window_open": {
         "name": "Window mode"
+      }
+    },
+    "climate": {
+      "thermostat": {
+        "name": "Thermostaat"
+      }
+    }
+  },
+
+  "selector": {
+    "manual_reset_mode": {
+      "options": {
+        "next_schedule": "Reset on next schedule",
+
+        "timeout": "Reset after timeout",
+
+        "manual_only": "Manual reset only"
       }
     }
   }

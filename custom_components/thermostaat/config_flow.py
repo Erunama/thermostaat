@@ -1,12 +1,13 @@
 import voluptuous as vol
-from homeassistant.config_entries import ConfigEntry
+from homeassistant.config_entries import ConfigEntry, OptionsFlow, ConfigFlow
+
 from homeassistant import config_entries
 from homeassistant.helpers import selector
 from homeassistant.core import callback
 from .const import DOMAIN
 
 
-class ThermostaatConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
+class ThermostaatConfigFlow(ConfigFlow, domain=DOMAIN):
     VERSION = 1
 
     async def async_step_user(self, user_input=None):
@@ -16,7 +17,6 @@ class ThermostaatConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 data=user_input,
             )
 
-        # TODO: Add errors
         schema = vol.Schema(
             {
                 vol.Required("climate_entity"): selector.EntitySelector(
@@ -24,7 +24,8 @@ class ThermostaatConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 ),
                 vol.Required("window_sensor"): selector.EntitySelector(
                     selector.EntitySelectorConfig(
-                        domain="binary_sensor", device_class="window"
+                        domain="binary_sensor",
+                        device_class=["window", "opening", "door", "garage_door"],
                     )
                 ),
                 vol.Required("away_entity"): selector.EntitySelector(
@@ -58,13 +59,10 @@ class ThermostaatConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         config_entry: ConfigEntry,
     ):
 
-        return ThermostaatOptionsFlow(config_entry)
+        return ThermostaatOptionsFlow()
 
 
-class ThermostaatOptionsFlow(config_entries.OptionsFlow):
-
-    def __init__(self, config_entry: ConfigEntry):
-        self.config_entry = config_entry
+class ThermostaatOptionsFlow(OptionsFlow):
 
     async def async_step_init(
         self,
@@ -77,11 +75,28 @@ class ThermostaatOptionsFlow(config_entries.OptionsFlow):
                 title="",
                 data=user_input,
             )
+        options = self.config_entry.options
 
         return self.async_show_form(
             step_id="init",
             data_schema=vol.Schema(
                 {
+                    vol.Required(
+                        "manual_reset_mode",
+                        default=options.get(
+                            "manual_reset_mode",
+                            "next_schedule",
+                        ),
+                    ): selector.SelectSelector(
+                        selector.SelectSelectorConfig(
+                            options=[
+                                "next_schedule",
+                                "timeout",
+                                "manual_only",
+                            ],
+                            translation_key="manual_reset_mode",
+                        )
+                    ),
                     vol.Required(
                         "away_temperature",
                         default=self.config_entry.options.get(
