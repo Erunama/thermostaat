@@ -28,7 +28,9 @@ async def async_setup_entry(
             climate_entity=climate_entity,
             entry_id=entry.entry_id,
             away_temp=away_temp,
-            scheduler_entity=scheduler_entity,
+            scheduler_entity=scheduler_entity,  
+            device_name=entry.title,
+
         )
         hass.data.setdefault(DOMAIN, {})
         hass.data[DOMAIN][entry.entry_id] = manager
@@ -132,7 +134,9 @@ async def async_setup_entry(
 
     await hass.config_entries.async_forward_entry_setups(
         entry,
-        ["sensor"],
+        ["climate",
+        "sensor",
+        "binary_sensor",],
     )
 
     return True

@@ -20,6 +20,7 @@ class ThermostaatManager:
         entry_id: str,
         away_temp: Decimal,
         scheduler_entity: SensorEntity,
+        device_name: str,
     ):
         self.hass = hass
         self.climate_entity = climate_entity
@@ -33,6 +34,7 @@ class ThermostaatManager:
         self.scheduled_temp = Decimal(18.0)
         self._listeners = []
         self._entities = []
+        self.device_name = device_name
 
     async def async_window_state_changed(self, is_open: bool):
         """
@@ -136,7 +138,7 @@ class ThermostaatManager:
             "climate",
             "set_temperature",
             {
-                "entity_id": self.climate_entity.entity_id,
+                "entity_id": self.climate_entity,
                 "temperature": temperature,
             },
         )
@@ -147,7 +149,7 @@ class ThermostaatManager:
             "climate",
             "turn_off",
             {
-                "entity_id": self.climate_entity.entity_id,
+                "entity_id": self.climate_entity,
             },
         )
 
@@ -157,6 +159,6 @@ class ThermostaatManager:
             "climate",
             "turn_on",
             {
-                "entity_id": self.climate_entity.entity_id,
+                "entity_id": self.climate_entity,
             },
         )
