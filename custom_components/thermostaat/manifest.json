@@ -4,8 +4,8 @@
   "codeowners": ["@Erunama"],
   "config_flow": true,
   "documentation": "https://github.com/Erunama/thermostaat",
-  "issue_tracker": "https://github.com/Erunama/thermostaat/issues",
   "iot_class": "local_push",
+  "issue_tracker": "https://github.com/Erunama/thermostaat/issues",
   "requirements": [],
   "version": "0.0.2"  
 }
