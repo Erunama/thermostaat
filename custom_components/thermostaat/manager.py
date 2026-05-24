@@ -32,7 +32,7 @@ class ThermostaatManager:
         self.window_open = False
         self.is_away = False
         self.manual_override = False
-        
+
         self._manual_thermostat_temp = Decimal(18.0)
         self._scheduled_temp = Decimal(18.0)
         self._listeners = []
@@ -108,6 +108,7 @@ class ThermostaatManager:
         if self.window_open:
             await self.async_turn_off()
             return
+        # TODO: This part feels a tad wonky
 
         await self.async_turn_on()
 

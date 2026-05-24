@@ -34,7 +34,11 @@ async def async_setup_entry(
         hass.data[DOMAIN][entry.entry_id] = manager
 
         scheduled_temp = hass.states.get(scheduler_entity)
-        if scheduled_temp is not None:
+        if scheduled_temp not in (
+            "unknown",
+            "unavailable",
+            None,
+        ):
             await manager.async_schedule_changed(Decimal(scheduled_temp.state))
 
         window_state = hass.states.get(window_sensor)
@@ -129,10 +133,14 @@ async def async_setup_entry(
 
         temp = new_state.state
 
-        if temp is None:
+        if temp in (
+            "unknown",
+            "unavailable",
+            None,
+        ):
             return
 
-        await manager.async_schedule_changed(temp)
+        await manager.async_schedule_changed(Decimal(temp))
 
     manager._listeners.extend(
         [
