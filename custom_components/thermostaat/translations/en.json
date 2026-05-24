@@ -58,24 +58,22 @@
       "window_open": {
         "name": "Window mode"
       }
-    }, 
+    },
     "climate": {
+      "thermostat": {
         "name": "Thermostaat"
       }
-    },
+    }
+  },
 
   "selector": {
     "manual_reset_mode": {
       "options": {
+        "next_schedule": "Reset on next schedule",
 
-        "next_schedule":
-          "Reset on next schedule",
+        "timeout": "Reset after timeout",
 
-        "timeout":
-          "Reset after timeout",
-
-        "manual_only":
-          "Manual reset only"
+        "manual_only": "Manual reset only"
       }
     }
   }

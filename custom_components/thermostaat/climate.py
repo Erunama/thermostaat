@@ -39,7 +39,7 @@ class ThermostaatClimate(
     """
 
     _attr_has_entity_name = True
-    _attr_translation_key = "Thermostat"
+    _attr_translation_key = "thermostat"
     _attr_name = "Thermostat"
     _attr_temperature_unit = UnitOfTemperature.CELSIUS
     _attr_supported_features = ClimateEntityFeature.TARGET_TEMPERATURE | ClimateEntityFeature.TURN_ON | ClimateEntityFeature.TURN_OFF
