@@ -41,8 +41,8 @@
 
   "entity": {
     "sensor": {
-      "effective_temperature": {
-        "name": "Effective temperature"
+      "target_temperature": {
+        "name": "Target temperature"
       }
     },
 
@@ -58,9 +58,13 @@
       "window_open": {
         "name": "Window mode"
       }
-    }
-  },
-    "selector": {
+    }, 
+    "climate": {
+        "name": "Thermostaat"
+      }
+    },
+
+  "selector": {
     "manual_reset_mode": {
       "options": {
 

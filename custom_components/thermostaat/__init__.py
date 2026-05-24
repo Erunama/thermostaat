@@ -2,7 +2,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.event import async_track_state_change_event
 
-from .const import DOMAIN
+from .const import DOMAIN, PLATFORMS
 from .manager import ThermostaatManager
 from decimal import Decimal
 
@@ -28,12 +28,34 @@ async def async_setup_entry(
             climate_entity=climate_entity,
             entry_id=entry.entry_id,
             away_temp=away_temp,
-            scheduler_entity=scheduler_entity,  
             device_name=entry.title,
-
         )
         hass.data.setdefault(DOMAIN, {})
         hass.data[DOMAIN][entry.entry_id] = manager
+
+        scheduled_temp = hass.states.get(scheduler_entity)
+        if scheduled_temp is not None:
+            await manager.async_schedule_changed(Decimal(scheduled_temp.state))
+
+        window_state = hass.states.get(window_sensor)
+
+        if window_state is not None:
+            await manager.async_window_state_changed(window_state.state == "on")
+
+        away_state = hass.states.get(away_entity)
+
+        if away_state is not None:
+            is_away = away_state.state != 0
+
+            await manager.async_away_state_changed(is_away)
+
+        climate_state = hass.states.get(climate_entity)
+
+        if climate_state is not None:
+            temp = climate_state.attributes.get("current_temperature")
+
+            if temp is not None:
+                await manager.async_climate_state_changed(temp)
 
     async def window_listener(event):
         _LOGGER.debug(
@@ -60,11 +82,7 @@ async def async_setup_entry(
 
         state = new_state.state
 
-        is_away = state in (
-            "off",
-            "not_home",
-            "away",
-        )
+        is_away = state != 0
 
         await manager.async_away_state_changed(is_away)
 
@@ -74,8 +92,17 @@ async def async_setup_entry(
             event,
         )
 
+        new_state = event.data.get("new_state")
+
+        if new_state is None:
+            return
+
+        await manager.async_climate_current_temperature_changed(
+            Decimal(new_state.attributes.get("current_temperature"))
+        )
+
         old_temp = _get_target_temperature(event.data.get("old_state"))
-        new_temp = _get_target_temperature(event.data.get("new_state"))
+        new_temp = _get_target_temperature(new_state)
 
         if old_temp == new_temp or new_temp is None:
             return
@@ -132,12 +159,7 @@ async def async_setup_entry(
         ]
     )
 
-    await hass.config_entries.async_forward_entry_setups(
-        entry,
-        ["climate",
-        "sensor",
-        "binary_sensor",],
-    )
+    await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
     return True
 
@@ -146,7 +168,7 @@ async def async_unload_entry(
     hass: HomeAssistant,
     entry: ConfigEntry,
 ):
-    unload_ok = await hass.config_entries.async_unload_platforms(entry, ["sensor"])
+    unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
 
     if unload_ok:
         manager = hass.data[DOMAIN].pop(entry.entry_id, None)
