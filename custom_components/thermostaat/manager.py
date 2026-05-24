@@ -19,18 +19,22 @@ class ThermostaatManager:
         climate_entity: ClimateEntity,
         entry_id: str,
         away_temp: Decimal,
-        scheduler_entity: SensorEntity,
+        device_name: str,
     ):
         self.hass = hass
+        self.device_name = device_name
         self.climate_entity = climate_entity
         self.entry_id = entry_id
         self.away_temp = away_temp
-        self._schedule_entity = scheduler_entity
+        
+        self.current_temp = Decimal(18.0)
+        self.current_set_temp = Decimal(18.0)
         self.window_open = False
         self.is_away = False
         self.manual_override = False
-        self.effective_temp = Decimal(18.0)
-        self.scheduled_temp = Decimal(18.0)
+
+        self._manual_thermostat_temp = Decimal(18.0)
+        self._scheduled_temp = Decimal(18.0)
         self._listeners = []
         self._entities = []
 
@@ -39,10 +43,6 @@ class ThermostaatManager:
         Handles window state changes.
         """
         self.window_open = is_open
-        _LOGGER.debug(
-            "Window state changed: %s",
-            is_open,
-        )
 
         await self.async_recalculate()
 
@@ -51,10 +51,6 @@ class ThermostaatManager:
         Handles away state changes.
         """
         self.is_away = is_away
-        _LOGGER.debug(
-            "Away state changed: %s",
-            is_away,
-        )
 
         await self.async_recalculate()
 
@@ -62,20 +58,25 @@ class ThermostaatManager:
         """
         Handles climate state changes.
         """
-        self.effective_temp = temperature
-        if (self.effective_temp != self.scheduled_temp) and (not self.manual_override):
+        self._manual_thermostat_temp = temperature
+        if (self._manual_thermostat_temp != self._scheduled_temp) and (not self.is_away):
             self.manual_override = True
-            _LOGGER.debug(
-                "Manual override enabled: %s",
-                self.manual_override,
-            )
         else:
-            _LOGGER.debug(
-                "Manual override disabled: %s",
-                self.manual_override,
-            )
             self.manual_override = False
 
+        await self.async_recalculate()
+
+    async def async_climate_current_temperature_changed(self, temperature: Decimal):
+        """
+        Handles climate state changes.
+        """
+        self.current_temp = temperature
+
+    async def async_reset_override(self):
+        """
+        Resets the manual override.
+        """
+        
         await self.async_recalculate()
 
     async def async_schedule_changed(
@@ -85,43 +86,43 @@ class ThermostaatManager:
         """
         Handles schedule changes.
         """
-
-        self.scheduled_temp = temperature
-        _LOGGER.debug(
-            "Schedule changed: %s",
-            temperature,
-        )
-
+        # TODO: This will someday be some internal thingy
+        self._scheduled_temp = temperature
+ 
         await self.async_recalculate()
 
     async def async_recalculate(self):
         """
         Recalculation logic
         """
-        # TODO: Implement logic
 
         _LOGGER.debug(
-            "Starting recalculation with states: away=%s, manual_override=%s, window_open=%s",
+            "Starting recalculation with states: away=%s, manual_override=%s, window_open=%s scheduled_temp=%s, manual_thermostat_temp=%s, away_temp=%s",
             self.is_away,
             self.manual_override,
             self.window_open,
+            self._scheduled_temp,
+            self._manual_thermostat_temp,
+            self.away_temp
         )
         if self.window_open:
             await self.async_turn_off()
             return
+        # TODO: This part feels a tad wonky
 
         await self.async_turn_on()
-        # TODO: This feels super verbose, i doubt this is the correct way
 
         if self.is_away:
             await self.async_set_temperature(self.away_temp)
             return
 
         if self.manual_override:
-            await self.async_set_temperature(self.effective_temp)
+            await self.async_set_temperature(self._manual_thermostat_temp)
             return
 
-        await self.async_set_temperature(self.scheduled_temp)
+        # Continue to follow schedule
+        # TODO: Something to take in mind when to follow schedule
+        await self.async_set_temperature(self._scheduled_temp)
 
     async def async_cleanup(self):
         """Called when integration is unloaded."""
@@ -132,11 +133,12 @@ class ThermostaatManager:
 
     async def async_set_temperature(self, temperature: Decimal):
         """Set the target temperature of the climate entity."""
+        self.current_set_temp = temperature
         await self.hass.services.async_call(
             "climate",
             "set_temperature",
             {
-                "entity_id": self.climate_entity.entity_id,
+                "entity_id": self.climate_entity,
                 "temperature": temperature,
             },
         )
@@ -147,7 +149,7 @@ class ThermostaatManager:
             "climate",
             "turn_off",
             {
-                "entity_id": self.climate_entity.entity_id,
+                "entity_id": self.climate_entity,
             },
         )
 
@@ -157,6 +159,6 @@ class ThermostaatManager:
             "climate",
             "turn_on",
             {
-                "entity_id": self.climate_entity.entity_id,
+                "entity_id": self.climate_entity,
             },
         )
