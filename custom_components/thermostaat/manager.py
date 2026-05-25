@@ -1,9 +1,18 @@
 import logging
 
 from decimal import Decimal
+from homeassistant.config_entries import ConfigEntry
 from homeassistant.components.climate import ClimateEntity
-from homeassistant.components.sensor import SensorEntity
 from homeassistant.core import HomeAssistant
+from datetime import timedelta
+
+from homeassistant.helpers.event import (
+    async_track_time_interval,
+)
+import json
+
+from datetime import time
+from homeassistant.util import dt
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -13,30 +22,63 @@ class ThermostaatManager:
     Manages the thermostat logic.
     """
 
-    def __init__(
+    async def __init__(
         self,
         hass: HomeAssistant,
-        climate_entity: ClimateEntity,
-        entry_id: str,
-        away_temp: Decimal,
-        device_name: str,
+        entry: ConfigEntry,
     ):
         self.hass = hass
-        self.device_name = device_name
-        self.climate_entity = climate_entity
-        self.entry_id = entry_id
-        self.away_temp = away_temp
-        
-        self.current_temp = Decimal(18.0)
-        self.current_set_temp = Decimal(18.0)
+
+        self.climate_entity = entry.data["climate_entity"]
+        self.away_temp = entry.data["away_temperature"]
+        self.entry = entry
+        self.device_name = entry.title
+
         self.window_open = False
         self.is_away = False
-        self.manual_override = False
+        self._manual_thermostat_temp = Decimal(18.0)
 
+        window_state = hass.states.get(entry.data["window_sensor"])
+        if window_state is not None:
+            self.window_open = window_state.state == "on"
+
+        away_state = hass.states.get(entry.data["away_entity"])
+        if away_state is not None:
+            self.is_away = away_state.state == "on"
+
+        climate_state = hass.states.get(entry.data["climate_entity"])
+
+        if climate_state is not None:
+            temp = climate_state.attributes.get("current_temperature")
+            if temp is not None:
+                self._manual_thermostat_temp = Decimal(temp)
+
+        self.current_temp = Decimal(18.0)
+        self.current_set_temp = Decimal(18.0)
+        self.manual_override = False
         self._manual_thermostat_temp = Decimal(18.0)
         self._scheduled_temp = Decimal(18.0)
         self._listeners = []
         self._entities = []
+
+        raw_schedule = entry.options.get(
+            "schedule_json",
+            "[]",
+        )
+
+        try:
+            self.schedule = json.loads(raw_schedule)
+        except Exception:
+            _LOGGER.exception("Invalid schedule JSON")
+            self.schedule = []
+
+        self.schedule.sort(key=lambda x: x["time"])
+
+        self.unsub_schedule = async_track_time_interval(
+            hass,
+            self.async_schedule_tick,
+            timedelta(minutes=1),
+        )
 
     async def async_window_state_changed(self, is_open: bool):
         """
@@ -61,7 +103,9 @@ class ThermostaatManager:
         Handles climate state changes.
         """
         self._manual_thermostat_temp = temperature
-        if (self._manual_thermostat_temp != self._scheduled_temp) and (not self.is_away):
+        if (self._manual_thermostat_temp != self._scheduled_temp) and (
+            not self.is_away
+        ):
             _LOGGER.debug("Manual override detected, setting manual override flag")
             self.manual_override = True
         else:
@@ -85,19 +129,6 @@ class ThermostaatManager:
         self.manual_override = False
         await self.async_recalculate()
 
-    async def async_schedule_changed(
-        self,
-        temperature: Decimal,
-    ):
-        """
-        Handles schedule changes.
-        """
-        # TODO: This will someday be some internal thingy
-        _LOGGER.debug("Schedule temperature changed to %s", temperature)
-        self._scheduled_temp = temperature
- 
-        await self.async_recalculate()
-
     async def async_recalculate(self):
         """
         Recalculation logic
@@ -110,7 +141,7 @@ class ThermostaatManager:
             self.window_open,
             self._scheduled_temp,
             self._manual_thermostat_temp,
-            self.away_temp
+            self.away_temp,
         )
         if self.window_open:
             _LOGGER.debug("Window is open, turning off thermostat")
@@ -119,7 +150,6 @@ class ThermostaatManager:
             _LOGGER.debug("Window is closed, turning on thermostat")
             await self.async_turn_on()
         # TODO: This part feels a tad wonky
-
 
         if self.is_away:
             _LOGGER.debug("Away mode is active, setting away temperature")
@@ -174,3 +204,21 @@ class ThermostaatManager:
                 "entity_id": self.climate_entity,
             },
         )
+
+    def resolve_scheduled_temperature(
+        self,
+    ):
+        """Resolves the scheduled temperature based on the current time and the schedule."""
+        now = dt.now().time()
+        current_temp = self._scheduled_temp
+        for entry in self.schedule:
+            entry_time = time.fromisoformat(entry["time"])
+            if now >= entry_time:
+                current_temp = entry["temperature"]
+        return current_temp
+
+    async def async_schedule_tick(self,now,):
+        new_temp = self.resolve_scheduled_temperature()
+        if new_temp != self._scheduled_temp:
+            self._scheduled_temp = new_temp
+            await self.async_recalculate()

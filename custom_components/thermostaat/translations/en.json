@@ -8,8 +8,7 @@
           "climate_entity": "Climate entity",
           "window_sensor": "Window sensor",
           "away_entity": "Away entity",
-          "away_temperature": "Away temperature",
-          "schedule_temperature": "Schedule temperature"
+          "away_temperature": "Away temperature"
         }
       }
     },
