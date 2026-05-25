@@ -43,7 +43,7 @@ class AwayModeSensor(ThermostaatEntityMixin, BinarySensorEntity):
     @property
     def is_on(self) -> bool:
         """Indicates if the system is in away mode."""
-        return self.manager.is_away
+        return not self.manager.is_away
 
 
 class ManualModeSensor(ThermostaatEntityMixin, BinarySensorEntity):

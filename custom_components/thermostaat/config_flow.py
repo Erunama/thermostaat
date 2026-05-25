@@ -29,7 +29,7 @@ class ThermostaatConfigFlow(ConfigFlow, domain=DOMAIN):
                     )
                 ),
                 vol.Required("away_entity"): selector.EntitySelector(
-                    selector.EntitySelectorConfig(domain="zone")
+                    selector.EntitySelectorConfig(domain="input_boolean")
                 ),
                 vol.Required("away_temperature", default=16): selector.NumberSelector(
                     selector.NumberSelectorConfig(
