@@ -42,6 +42,7 @@ class ThermostaatManager:
         """
         Handles window state changes.
         """
+        _LOGGER.debug("Window state changed to %s", is_open)
         self.window_open = is_open
 
         await self.async_recalculate()
@@ -50,6 +51,7 @@ class ThermostaatManager:
         """
         Handles away state changes.
         """
+        _LOGGER.debug("Away state changed to %s", is_away)
         self.is_away = is_away
 
         await self.async_recalculate()
@@ -60,8 +62,10 @@ class ThermostaatManager:
         """
         self._manual_thermostat_temp = temperature
         if (self._manual_thermostat_temp != self._scheduled_temp) and (not self.is_away):
+            _LOGGER.debug("Manual override detected, setting manual override flag")
             self.manual_override = True
         else:
+            _LOGGER.debug("No manual override detected, resetting manual override flag")
             self.manual_override = False
 
         await self.async_recalculate()
@@ -70,13 +74,15 @@ class ThermostaatManager:
         """
         Handles climate state changes.
         """
+        _LOGGER.debug("Current temperature changed to %s", temperature)
         self.current_temp = temperature
 
     async def async_reset_override(self):
         """
         Resets the manual override.
         """
-        
+        _LOGGER.debug("Resetting manual override")
+        self.manual_override = False
         await self.async_recalculate()
 
     async def async_schedule_changed(
@@ -87,6 +93,7 @@ class ThermostaatManager:
         Handles schedule changes.
         """
         # TODO: This will someday be some internal thingy
+        _LOGGER.debug("Schedule temperature changed to %s", temperature)
         self._scheduled_temp = temperature
  
         await self.async_recalculate()
@@ -106,22 +113,27 @@ class ThermostaatManager:
             self.away_temp
         )
         if self.window_open:
+            _LOGGER.debug("Window is open, turning off thermostat")
             await self.async_turn_off()
-            return
+        else:
+            _LOGGER.debug("Window is closed, turning on thermostat")
+            await self.async_turn_on()
         # TODO: This part feels a tad wonky
 
-        await self.async_turn_on()
 
         if self.is_away:
+            _LOGGER.debug("Away mode is active, setting away temperature")
             await self.async_set_temperature(self.away_temp)
             return
 
         if self.manual_override:
+            _LOGGER.debug("Manual override is active, setting manual temperature")
             await self.async_set_temperature(self._manual_thermostat_temp)
             return
 
         # Continue to follow schedule
         # TODO: Something to take in mind when to follow schedule
+        _LOGGER.debug("Following schedule, setting scheduled temperature")
         await self.async_set_temperature(self._scheduled_temp)
 
     async def async_cleanup(self):

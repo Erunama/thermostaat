@@ -49,9 +49,7 @@ async def async_setup_entry(
         away_state = hass.states.get(away_entity)
 
         if away_state is not None:
-            is_away = away_state.state != 0
-
-            await manager.async_away_state_changed(is_away)
+            await manager.async_away_state_changed(away_state.state == "on")
 
         climate_state = hass.states.get(climate_entity)
 
@@ -86,9 +84,7 @@ async def async_setup_entry(
 
         state = new_state.state
 
-        is_away = state != 0
-
-        await manager.async_away_state_changed(is_away)
+        await manager.async_away_state_changed(state == "on")
 
     async def climate_listener(event):
         _LOGGER.debug(
