@@ -33,6 +33,7 @@ class ThermostaatManager:
         self.away_temp = entry.data["away_temperature"]
         self.entry = entry
         self.device_name = entry.title
+        self.entry_id = entry.entry_id
 
         self.window_open = False
         self.is_away = False
