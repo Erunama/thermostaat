@@ -21,43 +21,12 @@ async def async_setup_entry(
         climate_entity = entry.data["climate_entity"]
         window_sensor = entry.data["window_sensor"]
         away_entity = entry.data["away_entity"]
-        away_temp = entry.data["away_temperature"]
-        scheduler_entity = entry.data["schedule_temperature"]
         manager = ThermostaatManager(
             hass=hass,
-            climate_entity=climate_entity,
-            entry_id=entry.entry_id,
-            away_temp=away_temp,
-            device_name=entry.title,
+            entry=entry,
         )
         hass.data.setdefault(DOMAIN, {})
         hass.data[DOMAIN][entry.entry_id] = manager
-
-        scheduled_temp = hass.states.get(scheduler_entity)
-        if scheduled_temp not in (
-            "unknown",
-            "unavailable",
-            None,
-        ):
-            await manager.async_schedule_changed(Decimal(scheduled_temp.state))
-
-        window_state = hass.states.get(window_sensor)
-
-        if window_state is not None:
-            await manager.async_window_state_changed(window_state.state == "on")
-
-        away_state = hass.states.get(away_entity)
-
-        if away_state is not None:
-            await manager.async_away_state_changed(away_state.state == "on")
-
-        climate_state = hass.states.get(climate_entity)
-
-        if climate_state is not None:
-            temp = climate_state.attributes.get("current_temperature")
-
-            if temp is not None:
-                await manager.async_climate_state_changed(temp)
 
     async def window_listener(event):
         _LOGGER.debug(
@@ -117,26 +86,7 @@ async def async_setup_entry(
 
         return Decimal(state.attributes.get("temperature"))
 
-    async def schedule_listener(event):
-        _LOGGER.debug(
-            "Schedule state change event: %s",
-            event,
-        )
-        new_state = event.data["new_state"]
-
-        if new_state is None:
-            return
-
-        temp = new_state.state
-
-        if temp in (
-            "unknown",
-            "unavailable",
-            None,
-        ):
-            return
-
-        await manager.async_schedule_changed(Decimal(temp))
+    await manager.async_initialize()
 
     manager._listeners.extend(
         [
@@ -155,14 +105,11 @@ async def async_setup_entry(
                 [climate_entity],
                 climate_listener,
             ),
-            async_track_state_change_event(
-                hass,
-                [scheduler_entity],
-                schedule_listener,
-            ),
         ]
     )
 
+    entry.async_on_unload(entry.add_update_listener(async_reload_entry))
+    
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
     return True
@@ -181,3 +128,12 @@ async def async_unload_entry(
             await manager.async_cleanup()
 
     return unload_ok
+
+async def async_reload_entry(
+    hass,
+    entry,
+):
+
+    await hass.config_entries.async_reload(
+        entry.entry_id
+    )
