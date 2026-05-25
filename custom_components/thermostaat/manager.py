@@ -75,12 +75,6 @@ class ThermostaatManager:
 
         self.schedule.sort(key=lambda x: x["time"])
 
-        self.unsub_schedule = async_track_time_interval(
-            hass,
-            self.async_schedule_tick,
-            timedelta(minutes=1),
-        )
-
     async def async_window_state_changed(self, is_open: bool):
         """
         Handles window state changes.
@@ -218,7 +212,26 @@ class ThermostaatManager:
                 current_temp = entry["temperature"]
         return current_temp
 
-    async def async_schedule_tick(self,now,):
+    async def async_schedule_tick(
+        self,
+        now,
+    ):
+        await self.async_update_schedule()
+
+    async def async_initialize(
+        self,
+    ):
+        self.unsub_schedule = async_track_time_interval(
+            self.hass,
+            self.async_schedule_tick,
+            timedelta(minutes=1),
+        )
+
+        await self.async_update_schedule()
+
+    async def async_update_schedule(
+        self,
+    ):
         new_temp = self.resolve_scheduled_temperature()
         if new_temp != self._scheduled_temp:
             self._scheduled_temp = new_temp

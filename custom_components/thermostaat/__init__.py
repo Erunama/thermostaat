@@ -28,7 +28,6 @@ async def async_setup_entry(
         hass.data.setdefault(DOMAIN, {})
         hass.data[DOMAIN][entry.entry_id] = manager
 
-
     async def window_listener(event):
         _LOGGER.debug(
             "Window state change event: %s",
@@ -87,6 +86,8 @@ async def async_setup_entry(
 
         return Decimal(state.attributes.get("temperature"))
 
+    await manager.async_initialize()
+
     manager._listeners.extend(
         [
             async_track_state_change_event(
@@ -107,6 +108,8 @@ async def async_setup_entry(
         ]
     )
 
+    entry.async_on_unload(entry.add_update_listener(async_reload_entry))
+    
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
     return True
@@ -125,3 +128,12 @@ async def async_unload_entry(
             await manager.async_cleanup()
 
     return unload_ok
+
+async def async_reload_entry(
+    hass,
+    entry,
+):
+
+    await hass.config_entries.async_reload(
+        entry.entry_id
+    )
