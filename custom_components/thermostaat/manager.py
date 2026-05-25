@@ -22,7 +22,7 @@ class ThermostaatManager:
     Manages the thermostat logic.
     """
 
-    async def __init__(
+    def __init__(
         self,
         hass: HomeAssistant,
         entry: ConfigEntry,
