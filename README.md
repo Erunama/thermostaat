@@ -1,5 +1,8 @@
 # Thermostaat
 ![GitHub Release](https://img.shields.io/github/v/release/Erunama/thermostaat?include_prereleases&display_name=tag&style=flat-square)
+
+BE WARNED: VERY WIP
+
 A wrapper for the Tado X valve controlers to integrate to home assistant via matter but keep similar useability.
 
 The goal is to thus mimic and expand what I see as key features:
